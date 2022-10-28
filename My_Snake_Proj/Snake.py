@@ -1,4 +1,4 @@
-#   --version 2.2
+#   --version 3.1
 #   --AI implemented
 #       -basic movement is kinda working
 #       -sometimes it gets stuck in a loop : back and forth -> need to make a rule for that by saving the last move and not letting to do the opposite of it
@@ -26,15 +26,15 @@ def DontClose():
             pygame.display.update()
 
     #CANVAS
-width = 400
-height = 400
+width = 900
+height = 600
 canvas = pygame.display.set_mode((width, height))
 
     #COLORS
 white = (255, 255, 255)
 transp_white = (255,255,255,127)
 red = (255, 0, 0)
-transp_red = (255, 0, 0, 125)
+transp_red = (255, 0, 0, 50)
 blue = (0, 0, 125)
 green = (0, 125, 0)
 transp_green = (0, 125, 0, 150)
@@ -57,8 +57,8 @@ def DrawWalls(wallcolor):
     walls.append(right)
     walls.append(bottom)
     
-    for wall in walls:
-        pygame.draw.rect(canvas, wallcolor, wall)
+    #for wall in walls:
+    #    pygame.draw.rect(canvas, wallcolor, wall)
 
     return walls
     #returns a list containing the RECtangles, and draws the walls
@@ -198,8 +198,9 @@ def is_collision(snake_list, HeadOfSnake, walls):
 def would_it_collide(future_rect, snake_list, walls):
     for wall in walls:
         if pygame.Rect.colliderect(future_rect, wall): return True
+
     for i in snake_list[:-1]: #Checks from the end of the list
-            if i == future_rect:  # if i(part of the snake)
+            if pygame.Rect.colliderect(i[2], future_rect):  # if i(part of the snake)
                return True   # collides with the head
     return False
 
@@ -210,10 +211,9 @@ def get_state(snake_block, snake_list, walls, foodx, foody):
 
     headx, heady = HeadOfSnake[0], HeadOfSnake[1]    
     left = pygame.Rect(headx - snake_block, heady, snake_block, snake_block)
-    point_right = [headx + snake_block, heady]
     right = pygame.Rect(headx + snake_block, heady, snake_block, snake_block)
-    up = pygame.Rect(headx, heady - 20, snake_block, snake_block)
-    down = pygame.Rect(headx, heady + 20, snake_block, snake_block)
+    up = pygame.Rect(headx, heady - snake_block, snake_block, snake_block)
+    down = pygame.Rect(headx, heady + snake_block, snake_block, snake_block)
     state.append(would_it_collide(left, snake_list, walls)) # [0] -> danger left (bool)
     state.append(would_it_collide(right, snake_list, walls))# [1] -> danger right (bool)
     state.append(would_it_collide(up, snake_list, walls))# [2] -> danger up (bool)
@@ -236,22 +236,29 @@ def get_state(snake_block, snake_list, walls, foodx, foody):
     # [4] -> location of food (left, right)
     # [5] -> location of food (up, down)
 
-def AI_movement_output(state):   
+def AI_movement_output(state, step_list):   
     action = ''
-    if state[4] == 'left' and state[0] == False:
-        action = state[4]
-        return action 
-    elif state[4] == 'right' and state[1] == False:
-        action = 'right'
-        return action 
-    else:
-        if state[5] == 'up' and state[2] == False:
+    if len(step_list) != 0:
+        if state[4] == 'left' and state[0] == False:# and step_list[len(step_list)-1] != 'right':
+            action = state[4]
+            return action 
+        if state[4] == 'right' and state[1] == False:# and step_list[len(step_list)-1] != 'left':
+            action = 'right'
+            return action 
+        if state[5] == 'up' and state[2] == False:# and step_list[len(step_list)-1] != 'down':
             action = 'up'
             return action
-        elif state[5] == 'down' and state[5] == False:
+        if state[5] == 'down' and state[3] == False:# and step_list[len(step_list)-1] != 'up':
             action  = 'down'
             return action 
+        else: return step_list[len(step_list)-1]
+    else: 
+        action = 'up'
+        return action
+ #AINT WORKING
 
+
+ # --A* algorithm
 #----------------BRAIN_OF_AI----------------
 
 
@@ -354,8 +361,10 @@ def Run_With_Inputs():
 def Run_AI():
     game_over = False
 
-    xpos = width / 2
-    ypos = height / 2
+    width / snake_block
+
+    xpos = ((width)/2)
+    ypos = ((height)/2)
     x_change = 0
     y_change = 0
     #DrawSnakeHead(xpos, ypos)
@@ -364,17 +373,24 @@ def Run_AI():
     Length_of_Snake = 1
     clock = pygame.time.Clock()
     
-    foodx = round(randint(0, width - snake_block)/snake_block) * snake_block
-    foody = round(randint(0, height - snake_block)/snake_block) * snake_block
 
+    step_list = []
+    foodx = round(randint(0, width - (2*snake_block))/snake_block) * snake_block
+    foody = round(randint(0, height - (2*snake_block))/snake_block) * snake_block
+    ourFont = pygame.font.Font("freesansbold.ttf", 15)
 
+    points = 0
     while not game_over:
+        
+
         DrawGrass()
-        DrawWalls(red)
+        #DrawWalls(red)
         walls = []
-        walls = DrawWalls(red)
+        walls = DrawWalls(transp_red)
         
-        
+        DrawApple(foodx, foody)
+        text = ourFont.render('Points: ' + str(points), True, transp_white)
+        canvas.blit(text, (0, 0))
 
         snake_Head = [] #[0-xpos, 1-ypos, 2-RECT]
         snake_Head.append(xpos)
@@ -390,22 +406,16 @@ def Run_AI():
             game_over = True
             GameOver()
         
-        vision = []
-        dangerZone = []
-        vision = SnakeVision(snake_block, snake_list, 5)
-        dangerZone = DangerArea(snake_block, snake_list)
-        #for pos in vision:
-            #print(pos[0], pos[1])
-        ShowVision_Area(vision, transp_white)
-        ShowVision_Area(dangerZone, transp_red)
-        DrawApple(foodx, foody)
+        
         Snekk(snake_block, snake_list)
 
         
         CurrentState = get_state(snake_block, snake_list, walls, foodx, foody)
         print(CurrentState)
-        action = AI_movement_output(CurrentState)
+        action = AI_movement_output(CurrentState, step_list)
         print(str(CurrentState) + "moved: " + str(action))
+        if action != None:
+            step_list.append(action)
         if action == 'left':
             x_change = -snake_block
             y_change = 0
@@ -428,14 +438,17 @@ def Run_AI():
             canvas.fill(black)
 
         if xpos == foodx and ypos == foody: #Checks the head of the snake collides with the food
-            foodx = round(randint(0, width - snake_block - 10)/snake_block) * snake_block
-            foody = round(randint(0, height - snake_block - 10)/snake_block) * snake_block
+            foodx = round(randint(snake_block, width - (2*snake_block))/snake_block) * snake_block
+            foody = round(randint(snake_block, height - (2*snake_block))/snake_block) * snake_block
             Length_of_Snake += 1            # if yes we add one more snake_block
             print("+1 point")
+            points += 1
+            DrawApple(foodx, foody)
 
+        
         #DrawSnakeHead(xpos, ypos)
-        clock.tick(24)
-        sleep(0.1)
+        clock.tick(120)
+        #sleep(0.1)
 
 #Run_With_Inputs()
 Run_AI()
