@@ -70,22 +70,14 @@ def _matrixWithSpots_():
             counter += 1
             #print(str(counter) + ". spots's: i" + str(spot.i) +" - j"+ str(spot.j) +" "+ str(spot.start)+" "+str(spot.finish)) 
         maze.append(row)
-#    for i in range(cols):
-#        for j in range(rows):
-#            spot.AddNeighbours(spot, maze, cols, rows)
     return maze
 
 
 maze = _matrixWithSpots_()
-#print(maze[0][0].i, maze[0][0].j)
-#print(maze[cols-1][rows-1].i, maze[cols-1][rows-1].j)
-#for i in range(cols):
-#    for j in range(rows):
-#        print( "-> spots's: i" + str(maze[i][j].i) +" - j"+ str(maze[i][j].j) +" "+ str(maze[i][j].start)+" "+str(maze[i][j].finish)) 
-       
 
        
 openSet.append(maze[0][0])
+
 end = _SpotC()
 end._SpotInit_(cols-1, rows-1)
 end.wall, end.finish = False, True
@@ -97,66 +89,82 @@ for i in range(cols-1):
         maze[i][j].AddNeighbours(maze, cols, rows)
 
 
-while(len(openSet) > 0):
-    #clock.tick(30)
-    #best next option
-    winner = 0
-    for i in range(len(openSet)):
-        if (openSet[i].f < openSet.__getitem__(winner).f):
-            winner = i     
-    current = openSet.__getitem__(winner)
+run = True
+while(run):
+    if (len(openSet) > 0):
+        #clock.tick(30)
+        #best next option
+        winner = 0
+        for i in range(len(openSet)):
+            if (openSet[i].f < openSet.__getitem__(winner).f):
+                winner = i     
+        current = openSet.__getitem__(winner)
 
-    #did we reach the finish?
-    if (current == end):
-        print("FinishedTask")
-        break
+        #did we reach the finish?
+        if (current.i == end.i and current.j == end.j):
+            print("FinishedTask")
+            break
 
-    #we move the best option to the openSet
-    openSet.remove(current)
-    closedSet.append(current)
+        #we move the best option to the openSet
+        openSet.remove(current)
+        closedSet.append(current)
 
-    #check the neighbours
-    thisNeighbours = current.neighbours
-    for i in range(len(thisNeighbours)):
-        neighbour = _SpotC()
-        neighbour = thisNeighbours[i]
+        #check the neighbours
+        thisNeighbours = current.neighbours
+        for i in range(len(thisNeighbours)):
+            neighbour = _SpotC()
+            neighbour = thisNeighbours[i]
 
-        #is the next spot valid or not?
-        if (neighbour not in closedSet and neighbour.wall == False):
-            tempG = current.g + heuristic(neighbour, current)
+            #is the next spot valid or not?
+            if (neighbour not in closedSet and neighbour.wall == False):
+                tempG = current.g + heuristic(neighbour, current)
 
-            #is the new found solution a better path?
-            newPath = False
-            if(openSet.__contains__(neighbour)):
-                if(tempG < neighbour.g):
+                #is the new found solution a better path?
+                newPath = False
+                if(openSet.__contains__(neighbour)):
+                    if(tempG < neighbour.g):
+                        neighbour.g = tempG
+                        newPath = True
+                else:
                     neighbour.g = tempG
                     newPath = True
-            else:
-                neighbour.g = tempG
-                newPath = True
-                openSet.append(neighbour)
+                    openSet.append(neighbour)
 
-            if(newPath):
-                neighbour.heuristic = heuristic(neighbour, end)
-                neighbour.f = neighbour.g + neighbour.heuristic
-                neighbour.previous = current
-    
-    if len(openSet)<1:
+                if(newPath):
+                    neighbour.heuristic = heuristic(neighbour, end)
+                    neighbour.f = neighbour.g + neighbour.heuristic
+                    neighbour.previous = current
+    else:
         print("No solution Possible")
+        run = False
+        break
 
-    
+            
+        #draws the current state of the stage:
     for i in range(cols):
         for j in range(rows):
             maze[i][j].ShowPoint(canvas, block_size)
-
-
-    for j in range(len(openSet)):
-        openSet[i].Show(canvas, block_size, green)
         
+    for i in range(len(openSet)):
+        openSet[i].Show(canvas, block_size, black)
+
     for i in range(len(closedSet)):
         closedSet[i].Show(canvas, block_size, red)
         #print(len(closedSet))
+    
+
+    path = []
+    temp = current
+    path.append(temp)
+    while(temp.previous):
+        path.append(temp.previous)
+        temp = temp.previous
+
+
+    for i in range(len(path)):
+        path[i].Show(canvas, block_size, blue)
+
     pygame.display.update()
-    clock.tick(120)
+    clock.tick(60)
         
 Do_not_close()
