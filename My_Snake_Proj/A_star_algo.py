@@ -8,9 +8,9 @@ import math
 
 clock = pygame.time.Clock()
 
-block_size = 10
-width = 1280
-height = 720
+block_size = 25
+width = 600
+height = 600
 
 cols = width // block_size
 rows = height // block_size
@@ -27,7 +27,8 @@ green = (0, 125, 0)
 black = (0,0,0)
 
 def heuristic(a, b):
-    dist = math.hypot(a.i-b.i, a.j-b.j)
+    #dist = math.hypot(a.i-b.i, a.j-b.j)
+    dist = (a.i-b.i) + (a.j-b.j)
     return dist
 
 openSet = []
@@ -154,8 +155,8 @@ while(len(openSet) > 0):
         
     for i in range(len(closedSet)):
         closedSet[i].Show(canvas, block_size, red)
-        print(len(closedSet))
+        #print(len(closedSet))
     pygame.display.update()
-    
+    clock.tick(120)
         
 Do_not_close()
