@@ -62,6 +62,7 @@ def _matrixWithSpots_():
                 spot = _SpotC()
                 spot._SpotInit_(i, j)
                 spot.wall, spot.finish, spot.start = False, True, False
+                spot.f = 0; spot.h = 0; spot.f = 0
             else:
                 spot = _SpotC()
                 spot._SpotInit_(i, j)   
@@ -84,14 +85,14 @@ maze = _matrixWithSpots_()
 openSet.append(maze[0][0])
 
 end = _SpotC()
-end._SpotInit_(cols-1, rows-1)
+end = maze[cols-1][rows-1]
 end.wall, end.finish = False, True
 print()
 path = []
+temp = _SpotC()
 run = True
-while(run):
+while(run == True):
     if (len(openSet) > 0):
-        #clock.tick(30)
         #best next option
         winner = 0
         for i in range(len(openSet)):
@@ -99,19 +100,21 @@ while(run):
                 winner = i     
         current = openSet[winner]
         #print(end.i, end.j, current.i, current.j)
-        #did we reach the finish?
 
-        if (current.i == end.i and current.j == end.j):
+        print("\n" + "finish: " + str(end.i) + " " + str(end.j))
+        print("current: " + str(current.i) + " " + str(current.j))
+        #did we reach the finish?
+        if (current.finish == True):
             print("FinishedTask")
             run = False
-            break
-        
 
-        #we move the best option to the openSet
+
+        #we move the best option from openSet to closedset
         openSet.remove(current)
         closedSet.append(current)
 
         #check the neighbours
+        thisNeighbours = []
         thisNeighbours = current.neighbours
         for i in range(len(thisNeighbours)):
             neighbour = _SpotC()
@@ -119,6 +122,7 @@ while(run):
 
             #is the next spot valid or not?
             if ((neighbour not in closedSet) and (neighbour.wall == False)):
+                tempG = 0.0
                 tempG = current.g + heuristic(neighbour, current)
                 
                 #is the new found solution a better path?
@@ -132,12 +136,14 @@ while(run):
                     newPath = True
                     openSet.append(neighbour)
 
-                #it is a better path
-                if(newPath):
+                #it IS a better path
+                if(newPath == True):
                     #print("better path")
                     neighbour.h = heuristic(neighbour, end)
                     neighbour.f = neighbour.g + neighbour.h
                     neighbour.pevious = current
+        
+        
     else:
         print("No possible solution")
         run = False
@@ -145,27 +151,29 @@ while(run):
 
             
         #draws the current state of the stage:
-    temp = current
-    path.append(temp)
-    #print(len(path))
-    while(temp.previous is not None):
-        path.append(temp.previous)
-        temp = temp.previous
     for i in range(cols):
         for j in range(rows):
             maze[i][j].ShowPoint(canvas, block_size)
         
-    for i in range(len(openSet)):
-        openSet[i].Show(canvas, block_size, black)
-
-    for i in range(len(path)):
-        path[i].Show(canvas, block_size, blue)
-
     for i in range(len(closedSet)):
         closedSet[i].Show(canvas, block_size, red)
         #print(len(closedSet))
 
+    for i in range(len(openSet)):
+        openSet[i].Show(canvas, block_size, green)
+
+     
+    temp = current
+    path.append(temp)
+    while(temp.previous !=  None):
+        path.append(temp.previous)
+        temp = temp.previous
+
+    for i in range(len(path)):
+            path[i].Show(canvas, block_size, blue)
+
     pygame.display.update()
-    clock.tick(24)
+    clock.tick(5)
         
+
 Do_not_close()
