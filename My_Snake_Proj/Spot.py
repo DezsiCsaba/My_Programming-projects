@@ -7,11 +7,12 @@ class _SpotC:
     i = 0
     j = 0
 
-    f = 0   #values needed for the A* 
-    g = 0   #to calculate the 
-    h = 0   #best possible next step
+    f = 0.0   #values needed for the A* 
+    g = 0.0   #to calculate the 
+    h = 0.0   #best possible next step
 
     neighbours = []   #a list containing all the neighboring spots
+    
 
     previous = None #the prev spot
 
@@ -25,8 +26,13 @@ class _SpotC:
         self.j = _j
         self.start, self.finish = False, False
         self.wall = False
-        if (randint(0,10) < 1):
+        if (randint(0,10) < 3):
             self.wall = True
+        self.neighbours = []
+        self.f = 0.0
+        self.g = 0.0
+        self.h = 0.0
+        self.previous = None
         
     def ShowPoint(self, Surface, blockSize):
         if (self.start):
