@@ -8,9 +8,9 @@ import math
 
 clock = pygame.time.Clock()
 
-block_size = 25
-width = 600
-height = 600
+block_size = 20
+width = 500
+height = 500
 
 cols = width // block_size
 rows = height // block_size
@@ -26,9 +26,10 @@ blue = (0, 0, 125)
 green = (0, 125, 0)
 black = (0,0,0)
 
+
 def heuristic(a, b):
     #dist = math.hypot(a.i-b.i, a.j-b.j)
-    dist = (a.i-b.i) + (a.j-b.j)
+    dist = (b.i-a.i) + (b.j-a.j)
     return dist
 
 openSet = []
@@ -70,6 +71,10 @@ def _matrixWithSpots_():
             counter += 1
             #print(str(counter) + ". spots's: i" + str(spot.i) +" - j"+ str(spot.j) +" "+ str(spot.start)+" "+str(spot.finish)) 
         maze.append(row)
+
+    for i in range(cols-1):
+        for j in range(rows-1):
+            maze[i][j].AddNeighbours(maze, cols, rows)
     return maze
 
 
@@ -81,14 +86,8 @@ openSet.append(maze[0][0])
 end = _SpotC()
 end._SpotInit_(cols-1, rows-1)
 end.wall, end.finish = False, True
-
-
-for i in range(cols-1):
-    for j in range(rows-1):
-        #print(i,j)
-        maze[i][j].AddNeighbours(maze, cols, rows)
-
-
+print()
+path = []
 run = True
 while(run):
     if (len(openSet) > 0):
@@ -96,14 +95,17 @@ while(run):
         #best next option
         winner = 0
         for i in range(len(openSet)):
-            if (openSet[i].f < openSet.__getitem__(winner).f):
+            if (openSet[i].f < openSet[winner].f):
                 winner = i     
-        current = openSet.__getitem__(winner)
-
+        current = openSet[winner]
+        #print(end.i, end.j, current.i, current.j)
         #did we reach the finish?
+
         if (current.i == end.i and current.j == end.j):
             print("FinishedTask")
+            run = False
             break
+        
 
         #we move the best option to the openSet
         openSet.remove(current)
@@ -116,12 +118,12 @@ while(run):
             neighbour = thisNeighbours[i]
 
             #is the next spot valid or not?
-            if (neighbour not in closedSet and neighbour.wall == False):
+            if ((neighbour not in closedSet) and (neighbour.wall == False)):
                 tempG = current.g + heuristic(neighbour, current)
-
+                
                 #is the new found solution a better path?
                 newPath = False
-                if(openSet.__contains__(neighbour)):
+                if(neighbour in openSet):
                     if(tempG < neighbour.g):
                         neighbour.g = tempG
                         newPath = True
@@ -130,17 +132,25 @@ while(run):
                     newPath = True
                     openSet.append(neighbour)
 
+                #it is a better path
                 if(newPath):
-                    neighbour.heuristic = heuristic(neighbour, end)
-                    neighbour.f = neighbour.g + neighbour.heuristic
-                    neighbour.previous = current
+                    #print("better path")
+                    neighbour.h = heuristic(neighbour, end)
+                    neighbour.f = neighbour.g + neighbour.h
+                    neighbour.pevious = current
     else:
-        print("No solution Possible")
+        print("No possible solution")
         run = False
         break
 
             
         #draws the current state of the stage:
+    temp = current
+    path.append(temp)
+    #print(len(path))
+    while(temp.previous is not None):
+        path.append(temp.previous)
+        temp = temp.previous
     for i in range(cols):
         for j in range(rows):
             maze[i][j].ShowPoint(canvas, block_size)
@@ -148,23 +158,14 @@ while(run):
     for i in range(len(openSet)):
         openSet[i].Show(canvas, block_size, black)
 
-    for i in range(len(closedSet)):
-        closedSet[i].Show(canvas, block_size, red)
-        #print(len(closedSet))
-    
-
-    path = []
-    temp = current
-    path.append(temp)
-    while(temp.previous):
-        path.append(temp.previous)
-        temp = temp.previous
-
-
     for i in range(len(path)):
         path[i].Show(canvas, block_size, blue)
 
+    for i in range(len(closedSet)):
+        closedSet[i].Show(canvas, block_size, red)
+        #print(len(closedSet))
+
     pygame.display.update()
-    clock.tick(60)
+    clock.tick(24)
         
 Do_not_close()
