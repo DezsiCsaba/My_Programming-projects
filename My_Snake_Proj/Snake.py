@@ -1,7 +1,6 @@
-#   --version 3.1
+#   --version 4.1
 #   --AI implemented
-#       -basic movement is kinda working
-#       -sometimes it gets stuck in a loop : back and forth -> need to make a rule for that by saving the last move and not letting to do the opposite of it
+#       AI uses the A*algorithm to solve the current best path after eating each apple      
 
 from cmath import rect
 from email.policy import default
