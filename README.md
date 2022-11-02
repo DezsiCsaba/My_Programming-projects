@@ -1,6 +1,12 @@
 # Python-projects
 
+My Snake Project:
+  A snake AI, that plays the game using the A* path finder algorithm
+-> A* algorithm wiki page: https://en.wikipedia.org/wiki/A*_search_algorithm
 
--> A* algorithm: https://levelup.gitconnected.com/a-star-a-search-for-solving-a-maze-using-python-with-visualization-b0cae1c3ba92
-
--> Youtube playlist with different algorithms using pymaze : https://www.youtube.com/playlist?list=PLWF9TXck7O_zsqnufs62t26_LJnLo4VRA
+-> The yt channel Coding Train was instrumental with the development of my code:
+    https://www.youtube.com/watch?v=aKYlikFAV4k
+    https://www.youtube.com/watch?v=EaZxUCWAjb0
+    https://www.youtube.com/watch?v=aKYlikFAV4k
+    
+    Their code: https://github.com/CodingTrain/Coding-Challenges/tree/main/051_astar
