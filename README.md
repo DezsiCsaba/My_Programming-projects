@@ -6,7 +6,9 @@ My Snake Project:
 
 -> The yt channel Coding Train was instrumental with the development of my code:
     https://www.youtube.com/watch?v=aKYlikFAV4k
+    
     https://www.youtube.com/watch?v=EaZxUCWAjb0
+    
     https://www.youtube.com/watch?v=aKYlikFAV4k
     
     Their code: https://github.com/CodingTrain/Coding-Challenges/tree/main/051_astar
