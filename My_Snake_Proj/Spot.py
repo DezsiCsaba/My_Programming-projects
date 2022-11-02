@@ -36,15 +36,15 @@ class _SpotC:
         
     def ShowPoint(self, Surface, blockSize):
         if (self.start):
-            pygame.draw.rect(Surface, (0,255,0), (self.i*blockSize, self.j*blockSize, blockSize-2, blockSize-2))
+            pygame.draw.rect(Surface, (0,255,0), (self.i*blockSize, self.j*blockSize, blockSize-1, blockSize-1))
         elif (self.finish):
-            pygame.draw.rect(Surface, (0,0,255), (self.i*blockSize, self.j*blockSize, blockSize-2, blockSize-2))
+            pygame.draw.rect(Surface, (0,0,255), (self.i*blockSize, self.j*blockSize, blockSize-1, blockSize-1))
         elif (self.wall):
-            pygame.draw.rect(Surface, (255,255,255), (self.i*blockSize, self.j*blockSize, blockSize-2, blockSize-2))
-        else: pygame.draw.rect(Surface, (0,0,0), (self.i*blockSize, self.j*blockSize, blockSize-2, blockSize-2))
+            pygame.draw.rect(Surface, (255,255,255), (self.i*blockSize, self.j*blockSize, blockSize-1, blockSize-1))
+        else: pygame.draw.rect(Surface, (0,0,0), (self.i*blockSize, self.j*blockSize, blockSize-1, blockSize-1))
 
     def Show(self, Surface, blockSize, color):
-            pygame.draw.rect(Surface, color, (self.i*blockSize, self.j*blockSize, blockSize-2, blockSize-2))
+            pygame.draw.rect(Surface, color, (self.i*blockSize, self.j*blockSize, blockSize, blockSize))
        
 
     def AddNeighbours(self, matrix, cols, rows):
