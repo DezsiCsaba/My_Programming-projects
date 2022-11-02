@@ -4,15 +4,17 @@
 #       -sometimes it gets stuck in a loop : back and forth -> need to make a rule for that by saving the last move and not letting to do the opposite of it
 
 from cmath import rect
+from email.policy import default
 from operator import length_hint
 from pickle import FALSE, TRUE
+import pstats
 from random import randint, random
 from sre_parse import State
 from tkinter.tix import Tree
 import pygame
 import math
 from time import sleep
-
+from A_star import _PlayArea_to_Spot_Matrix, A_star_with_PlayArea
 
 pygame.init()
 
@@ -29,6 +31,8 @@ def DontClose():
 width = 900
 height = 600
 canvas = pygame.display.set_mode((width, height))
+
+snake_block = 20 #size of one block of snake/food (10->10x10 pixels)
 
     #COLORS
 white = (255, 255, 255)
@@ -73,12 +77,15 @@ def GameOver():
     #displays the "Game Over" text onto the display
 
 #----------------SNAKE----------------
-snake_block = 10 #size of one block of snake/food (10->10x10 pixels)
 
 def Snekk(snake_block, snake_list):
+    index = len(snake_list)-1
     for x in snake_list:
         #pygame.draw.rect(canvas,blue,(x[0], x[1], snake_block, snake_block))
-        pygame.draw.rect(canvas, blue, (x[2]))
+        if (index == 0):
+            pygame.draw.rect(canvas, blue,(x[2]))
+        else:   pygame.draw.rect(canvas, blue, (x[2]))
+        index += -1
 
 
 
@@ -236,6 +243,8 @@ def get_state(snake_block, snake_list, walls, foodx, foody):
     # [4] -> location of food (left, right)
     # [5] -> location of food (up, down)
 
+#the basic movement that was implemented before A* (not workin really well )
+#uses the state function which is also full of holes tbh -> (sometimes good, sometimes shit)
 def AI_movement_output(state, step_list):   
     action = ''
     if len(step_list) != 0:
@@ -255,10 +264,23 @@ def AI_movement_output(state, step_list):
     else: 
         action = 'up'
         return action
- #AINT WORKING
-
-
- # --A* algorithm
+ 
+ # --A* algorithm's workings
+ # basically we want the snake to follow the path, that was calculated by A*
+ # the path is made of _SpotC objects, and theese objects have .i and .j traits
+    # we will use theese traits to tell where the snake will have to move
+def NextStep(path, xpos, ypos, stepCount):
+    # closest path element's index : len(path)-2
+    x, y = xpos // snake_block, ypos // snake_block
+    pygame.draw.rect(canvas, blue, (path[len(path)-stepCount].i*snake_block-2, path[len(path)-stepCount].j*snake_block-2, snake_block+4, snake_block+4))
+    if (x < path[len(path)-stepCount].i):
+        return "right"
+    elif (x > path[len(path)-stepCount].i):
+        return "left"
+    elif (y < path[len(path)-stepCount].j):
+        return "down"
+    elif (y > path[len(path)-stepCount].j):
+        return "up"
 #----------------BRAIN_OF_AI----------------
 
 
@@ -363,59 +385,46 @@ def Run_AI():
 
     width / snake_block
 
-    xpos = ((width)/2)
-    ypos = ((height)/2)
+    xpos = int((width)/2 //snake_block) * snake_block
+    ypos = int((height)/2 //snake_block) * snake_block
     x_change = 0
     y_change = 0
     #DrawSnakeHead(xpos, ypos)
-
     snake_list = []
+
+    snake_Head = [] #[0-xpos, 1-ypos, 2-RECT]
+    snake_Head.append(xpos)
+    snake_Head.append(ypos)        
+    snake_Head.append(pygame.Rect(xpos, ypos, snake_block, snake_block))
+    snake_list.append(snake_Head)
+
     Length_of_Snake = 1
     clock = pygame.time.Clock()
-    
 
-    step_list = []
-    foodx = round(randint(0, width - (2*snake_block))/snake_block) * snake_block
-    foody = round(randint(0, height - (2*snake_block))/snake_block) * snake_block
+    foodx = int(randint(snake_block, width - (2*snake_block))/snake_block) * snake_block
+    foody = int(randint(snake_block, height - (2*snake_block))/snake_block) * snake_block
     ourFont = pygame.font.Font("freesansbold.ttf", 15)
+
+     #--------this is where the A* works it's magic        
+    snakeMaze = _PlayArea_to_Spot_Matrix(foodx, foody, snake_list, width, height, snake_block, canvas)
+    path = []
+    path = A_star_with_PlayArea(snakeMaze, width//snake_block, height//snake_block, canvas, snake_block)
+    #--------this is where the A* works it's magic 
+    step_counter = 2
+    
 
     points = 0
     while not game_over:
-        
-
+        print(step_counter)
         DrawGrass()
         #DrawWalls(red)
         walls = []
-        walls = DrawWalls(transp_red)
         
         DrawApple(foodx, foody)
         text = ourFont.render('Points: ' + str(points), True, transp_white)
         canvas.blit(text, (0, 0))
-
-        snake_Head = [] #[0-xpos, 1-ypos, 2-RECT]
-        snake_Head.append(xpos)
-        snake_Head.append(ypos)        
-        snake_Head.append(pygame.Rect(xpos, ypos, snake_block, snake_block))
-        snake_list.append(snake_Head)
-
-        if len(snake_list) > Length_of_Snake: #Deletes the tail of the snake
-            del snake_list[0]                 # so we can make it 'move' 
         
-        head_of_snake = snake_list[len(snake_list) - 1]
-        if is_collision(snake_list, head_of_snake, walls) == True:
-            game_over = True
-            GameOver()
-        
-        
-        Snekk(snake_block, snake_list)
-
-        
-        CurrentState = get_state(snake_block, snake_list, walls, foodx, foody)
-        print(CurrentState)
-        action = AI_movement_output(CurrentState, step_list)
-        print(str(CurrentState) + "moved: " + str(action))
-        if action != None:
-            step_list.append(action)
+        action = NextStep(path, xpos, ypos, step_counter)        
         if action == 'left':
             x_change = -snake_block
             y_change = 0
@@ -428,27 +437,61 @@ def Run_AI():
         elif action == 'up':
             x_change = 0
             y_change = -snake_block
-
+        
         xpos += x_change
         ypos += y_change
+        step_counter += 1
+
+        if xpos == foodx and ypos == foody: #Checks if the head of the snake collides with the food
+            snake_body = [] #[0-xpos, 1-ypos, 2-RECT]
+            snake_body.append(xpos)
+            snake_body.append(ypos)        
+            snake_body.append(pygame.Rect(xpos, ypos, snake_block, snake_block))
+            snake_list.append(snake_body)
+
+            foodx = int(randint(snake_block, width - (2*snake_block))/snake_block) * snake_block
+            foody = int(randint(snake_block, height - (2*snake_block))/snake_block) * snake_block
+            Length_of_Snake += 1            # if yes we add one more snake_block
+            print("+1 point")
+            points += 1
+            DrawApple(foodx, foody)
+            step_counter = 2
+             #--------this is where the A* works it's magic        
+            snakeMaze = _PlayArea_to_Spot_Matrix(foodx, foody, snake_list, width, height, snake_block, canvas)
+            path = []
+            path = A_star_with_PlayArea(snakeMaze, width//snake_block, height//snake_block, canvas, snake_block)
+          
+            #--------this is where the A* works it's magic 
+        else:
+            snake_body = [] #[0-xpos, 1-ypos, 2-RECT]
+            snake_body.append(xpos)
+            snake_body.append(ypos)        
+            snake_body.append(pygame.Rect(xpos, ypos, snake_block, snake_block))
+            snake_list.append(snake_body)
+        
+        
+        #for i in range(len(path)):
+        #    draw_rect_alpha(canvas, transp_white, (path[i].i*snake_block, path[i].j*snake_block, snake_block-1, snake_block-1))
+
+        if len(snake_list) > Length_of_Snake: #Deletes the tail of the snake
+            del snake_list[0]                 # so we can make it 'move' 
+        
+        head_of_snake = snake_list[len(snake_list) - 1]
+        if is_collision(snake_list, head_of_snake, walls) == True:
+            game_over = True
+            GameOver()
+        
+        
+        Snekk(snake_block, snake_list)
 
 
         pygame.display.update()
         if game_over == FALSE:
             canvas.fill(black)
 
-        if xpos == foodx and ypos == foody: #Checks the head of the snake collides with the food
-            foodx = round(randint(snake_block, width - (2*snake_block))/snake_block) * snake_block
-            foody = round(randint(snake_block, height - (2*snake_block))/snake_block) * snake_block
-            Length_of_Snake += 1            # if yes we add one more snake_block
-            print("+1 point")
-            points += 1
-            DrawApple(foodx, foody)
-
-        
         #DrawSnakeHead(xpos, ypos)
-        clock.tick(120)
-        #sleep(0.1)
+        clock.tick(60)
+        #sleep(0.2)
 
 #Run_With_Inputs()
 Run_AI()
