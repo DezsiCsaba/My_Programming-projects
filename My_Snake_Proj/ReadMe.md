@@ -2,7 +2,7 @@ My Snake Project:
   A snake AI, that plays the game using the A* path finder algorithm
 -> [A* algorithm wiki page](https://en.wikipedia.org/wiki/A*_search_algorithm)
 
-![A* algorithm in work:](![image](https://user-images.githubusercontent.com/111079927/199972878-f8018a72-ff7e-4caf-819e-70755accb494.png))
+![A* algorithm in work:](https://upload.wikimedia.org/wikipedia/commons/5/5d/Astar_progress_animation.gif)
 
 -> The yt channel Coding Train was instrumental with the development of my code:
 - [part 1](https://www.youtube.com/watch?v=aKYlikFAV4k)
