@@ -20,7 +20,8 @@ class Tile_C():
     edges = str
     index = int 
     w, h = int, int
-
+    index = int
+    
     def _TileInit (self, img, edges, DIM_of_img):
         self.image = img
         self.edges = edges
@@ -44,3 +45,15 @@ class Tile_C():
     def _ShowTile(self, display, x, y):
         disptile = pygame.transform.scale(self.image, (self.h, self.w))
         display.blit(disptile, (x, y))
+
+    def _analyze(self, tiles):
+        for i in range(len(tiles)):
+            tile = tiles[i]
+            if (tile.edges[2] == self.edges[0]): #right
+                self.up = i
+            if (tile.edges[3] == self.edges[1]): #right
+                self.right = i
+            if (tile.edges[0] == self.edges[2]): #down
+                self.down = i
+            if (tile.edges[1] == self.edges[3]): #left
+                self.left = i
