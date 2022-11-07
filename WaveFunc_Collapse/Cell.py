@@ -1,4 +1,4 @@
-class _CellC():
+class Cell_C():
     collapsed = False
     options = []
     
@@ -10,3 +10,7 @@ class _CellC():
             self.options = []
             for i in range(0,value):
                 self.options.append(i)
+
+    def _CellInit(self):
+        self.options = []
+        self.collapsed = False
