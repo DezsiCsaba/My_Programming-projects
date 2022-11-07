@@ -3,7 +3,8 @@ from Tile import Tile_C
 from Cell import Cell_C
 from random import randint
 import random
-
+from time import sleep
+import numpy as np
 
 
 pygame.display.set_caption("Wave_Function_Collapse")
@@ -18,7 +19,7 @@ def DontClose():
 h = 400
 w = h
 canvas = pygame.display.set_mode((h,w))
-DIM_of_canvas = 2  # 10 -> 10 x 10 tiles
+DIM_of_canvas = 5  # 10 -> 10 x 10 tiles
 DIM_of_img = int(h/DIM_of_canvas)
 SIZE_of_IMG = (DIM_of_img, DIM_of_img)
 
@@ -32,8 +33,8 @@ def _import_all_images_(dir): #given a directory, lists all the files within
     return tileImages
 def load_demo_tiles():
     tiles=[]
-    tiles.append(pygame.image.load("Python\WaveFunc_Collapse\Demo_Tiles/blank.png"))
-    tiles.append(pygame.image.load("Python\WaveFunc_Collapse\Demo_Tiles/up.png"))
+    tiles.append(pygame.image.load("Demo_Tiles/blank.png"))
+    tiles.append(pygame.image.load("Demo_Tiles/up.png"))
     #tiles.append(pygame.transform.rotate(tiles[0], pi/2 * 1))
     return tiles
 def displayIMG():
@@ -55,11 +56,15 @@ def DrawAllTiles(tileList):
 tileImages = load_demo_tiles()
 
 
-def CheckValid(list, valid):
-    for i in range(len(list)-1):
+def CheckValid(array, valid):
+    #for i in range(len(list)-1):
+    i = array.size - 1
+    flipped = np.flip(array)
+    for i in range(flipped.size):
         element = list[i]
         if (element not in valid):
-            slice(i, 1)
+            slice(1, i)
+        #i += -1
 #displayIMG()
 
 
@@ -96,28 +101,34 @@ for i in range(DIM_of_canvas*DIM_of_canvas):
     grid.append(gridi)
     # -----Hardcoded values for debugging
     #grid[0].collapsed = True
-    #grid[10].options = [tiles[1], tiles[4]]
-    #grid[0].options = [tiles[0], tiles[2]]
-    #grid[2].options = [tiles[1], tiles[4]]
+#grid[6].options = [tiles[1], tiles[4]]
+#grid[0].options = [tiles[0], tiles[2]]
+#grid[2].options = [tiles[1], tiles[4]]
+
+
 print(len(grid))
 def _WCF():
-    #print("iterated")
     pygame.display.update()
     for i in range(len(tiles)):
         tiles[i]._analyze(tiles)
-
-    
     
     # -----Pick cell with the lowest entropy
+    copyOfGrid = []
     copyOfGrid = grid.copy()
     copyOfGrid.sort(key = lambda x: len(x.options))
+    copiedArray = np.asarray(copyOfGrid.copy())
+
+    #filtered = []
+    stopIndex = 0
+    length = len(copiedArray[0].options)
+    for i in range(len(copiedArray)):
+        if (len(copiedArray[i].options) > length):
+            stopIndex = i
+            break
+    print("stopI = " + str(stopIndex))
     
-    for i in range(len(copyOfGrid)):
-        if (len(copyOfGrid[i].options) == len(copyOfGrid[0].options)):
-            filtered.append(copyOfGrid[i])
-    
-    
-    cell = random.choice(filtered)
+    if (stopIndex > 0): copiedArray[0:stopIndex+1]
+    cell = random.choice(copiedArray)
     cell.collapsed = True
     pick = random.choice(cell.options)
     cell.options = [pick]
@@ -131,17 +142,15 @@ def _WCF():
             if (grid[index].collapsed == True):
                 grid[index].options[0]._ShowTile(canvas, x*DIM_of_img, y*DIM_of_img)
             else:
-                pygame.draw.rect(canvas, (0,0,0), (j*DIM_of_img, i*DIM_of_img, DIM_of_img, DIM_of_img))
-                
+                pygame.draw.rect(canvas, (0,0,0), (j*DIM_of_img, i*DIM_of_img, DIM_of_img, DIM_of_img))                
             index += 1
             x += 1
         y += 1
     
     
-    nextTiles = []
-    for k in range(DIM_of_canvas * DIM_of_canvas):
-        nextTiles.append(i)
-
+    newtilelist = []
+    #nextTiles = np.asarray(newtilelist)
+    nextTiles = np.empty(h, Cell_C)
 
     for j in range(DIM_of_canvas):
         for i in range(DIM_of_canvas):
@@ -149,64 +158,62 @@ def _WCF():
             if (grid[index].collapsed):
                 nextTiles[index] = (grid[index])
             else:
-                options = []
+                options = np.empty(len(tiles), Tile_C)
                 for i in range(len(tiles)):
-                    options.append(i)
+                    options[i] = i
                 #up
                 if (j > 0):
                     up = grid[i + (j-1) * DIM_of_canvas]
-                    ValidOptions =  []
-                    insideindex = 0
+                    ValidOptions =  []                    
                     for z in range(len(up.options)):
                         valid = tiles[z].up
-                        ValidOptions.append(valid)
-                        insideindex += 1
+                        ValidOptions.append(valid)                        
                     CheckValid(options, ValidOptions)
                 #right
                 if (i < DIM_of_canvas - 1):
                     right = grid[i + 1 + j *DIM_of_canvas]
-                    ValidOptions =  []
-                    insideindex = 0
+                    ValidOptions =  []                   
                     for z in range(len(right.options)):
                         valid = tiles[z].right
-                        ValidOptions.append(valid)
-                        insideindex += 1
+                        ValidOptions.append(valid)                       
                     CheckValid(options, ValidOptions)
                 #down
                 if (j < DIM_of_canvas - 1):
                     down = grid[i + (j + 1) * DIM_of_canvas]
-                    ValidOptions =  []
-                    insideindex = 0
+                    ValidOptions =  []                    
                     for z in range(len(down.options)):
                         valid = tiles[z].down
                         ValidOptions.append(valid)
-                        insideindex += 1
-                    CheckValid(options, ValidOptions)
-
+                        CheckValid(options, ValidOptions)
                 #left
                 if (j > 0):
                     left = grid[i - 1 + j *DIM_of_canvas]
-                    ValidOptions =  []
-                    insideindex = 0
+                    ValidOptions =  []                    
                     for z in range(len(left.options)):
                         valid = tiles[z].left
                         ValidOptions.append(valid)
-                        insideindex += 1
                     CheckValid(options, ValidOptions)
-
                 next = Cell_C()
                 next._CellInit(options)
-                #nextTiles[index] = next
-                nextTiles.append(next)
+                nextTiles[index] = next
+                #nextTiles.append(next)
 
-    #for i in range(len(grid)):
-    #    if grid[i].collapsed == false: return True
+    colls = 0
+    for i in range(len(grid)):
+        if (grid[i].collapsed):
+            colls += 1
+    print("Collapsed:" + str(colls))
+    return copiedArray
 
-
-filtered = []
-
-
-while(True):_WCF()
+iteration = 0
+while(True):
+    sleep(1)
+    filtered = _WCF()
+    pygame.display.update()
+    print(len(filtered))
+    #canvas.fill((0,0,0))
+    iteration += 1
+    #print(str(iteration) + ".iteratiion")
 
 #print(len(filtered))
 #DrawAllTiles(tiles)

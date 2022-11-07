@@ -36,15 +36,20 @@ class Tile_C():
 
         newEdges = []
         for i in range(len(self.edges)):
-            newEdges.append(self.edges[i-1 + len(self.edges) % len(self.edges)])
+            newEdges.append(self.edges[(i - num + len(self.edges)) % len(self.edges)])
 
         tile = Tile_C()
         tile._TileInit(newimg, newEdges, self.h)
         return tile
 
+
+
     def _ShowTile(self, display, x, y):
         disptile = pygame.transform.scale(self.image, (self.h, self.w))
         display.blit(disptile, (x, y))
+
+
+
 
     def _analyze(self, tiles):
         for i in range(len(tiles)):
