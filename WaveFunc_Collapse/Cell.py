@@ -1,20 +1,17 @@
 import numpy as np
-from Tile import Tile_C
 
 class Cell_C():
     collapsed = False
-    #options = []
-    options = np.empty(5, int)
-
+    options = []
+    
     def _CellInit(self, value):
         self.collapsed = False
-        if (isinstance(value, list)):
+        if (isinstance(value, np.ndarray) or isinstance(value, list)):
             self.options = value
         else:
-            self.options = np.empty((1(1)))
+            self.options = []
             for i in range(0,value):
-                #self.options.append(i)
-                self.options[i] = i
+                self.options.append(i)
 
     #def _CellInit(self):
     #    self.options = []
