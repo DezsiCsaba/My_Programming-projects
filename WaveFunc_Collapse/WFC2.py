@@ -19,7 +19,7 @@ def DontClose():
 h = 400
 w = h
 canvas = pygame.display.set_mode((h,w))
-DIM_of_canvas = 10  # 10 -> 10 x 10 tiles
+DIM_of_canvas = 5  # 10 -> 10 x 10 tiles
 DIM_of_img = int(h/DIM_of_canvas)
 SIZE_of_IMG = (DIM_of_img, DIM_of_img)
 
@@ -140,7 +140,7 @@ def WFC():
                 #---look up
                 if(j > 0):
                     up = grid[i + (j-1) * DIM_of_canvas]
-                    validOptions = np.empty((len(tiles)))
+                    validOptions = np.full((len(tiles)), None)
                     for option in up.options:
                         valid = tiles[option].down
                         validOptions = np.concatenate((validOptions, valid))
