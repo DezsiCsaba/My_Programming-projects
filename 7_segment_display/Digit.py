@@ -25,6 +25,7 @@ class Digit_C():
         E._segmenInit_("E", (self.basex+displace-short, y+long+2*short, short, long))
         F._segmenInit_("F", (self.basex+displace-short, y+short, short, long))
         G._segmenInit_("G", (self.basex+displace, y+long+short, long, short))
+        
 
         self.Segments[0] = A
         self.Segments[1] = B

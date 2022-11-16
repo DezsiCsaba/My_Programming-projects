@@ -14,7 +14,7 @@ def DontClose():
             pygame.display.update()
 
 
-h = 400
+h = 500
 w = h
 DIM = h/100
 canvas = pygame.display.set_mode((h,w))

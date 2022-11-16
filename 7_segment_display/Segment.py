@@ -4,7 +4,7 @@ class Segment_C():
 
     name = ""
     isOn = False
-    segmentRect = None
+    segmentRect = pygame.rect(0,0,0,0)
 
     def _segmenInit_(self, name, rectangle):
         self.name = name
