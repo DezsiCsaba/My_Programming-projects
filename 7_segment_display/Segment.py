@@ -1,11 +1,15 @@
+import pygame
+
 class Segment_C():
 
     name = ""
     isOn = False
+    segmentRect = None
 
-    def _segmenInit_(self, name):
+    def _segmenInit_(self, name, rectangle):
         self.name = name
-        self.isOn = False
+        self.isOn = True
+        self.segmentRect = rectangle
 
     def SegmentSwitch(self, on_or_off):
         if (on_or_off == True or on_or_off == "on"):
